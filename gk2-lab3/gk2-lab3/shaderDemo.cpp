@@ -23,11 +23,25 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 	m_variables.AddGuiVariable("kd", 0.5f);
 	m_variables.AddGuiVariable("ka", 0.2f);
 	m_variables.AddGuiVariable("m", 50.f, 10.f, 200.f);
+	m_variables.AddSampler(m_device, "samp");
+	m_variables.AddTexture(m_device, "normTex", L"textures/normal.png");
 
 	//Models
 	const auto sphere = addModelFromString("s 0 0 0 0.5");
+	auto teapot = addModelFromFile("models/Teapot.3ds");
+
+	//Transform teapot
+	XMFLOAT4X4 modelMtx;
+	float scale = 1 / 60.0f;
+	float rotation = -AI_MATH_HALF_PI;
+	XMMATRIX modelMatrix = XMMatrixScaling(scale, scale, scale) * XMMatrixRotationX(rotation) * XMMatrixTranslation(0.0f, 0.5f, 0.0f);
+	XMStoreFloat4x4(&modelMtx, modelMatrix);
+	model(teapot).applyTransform(modelMtx);
 
 	//Render Passes
 	const auto passSphere = addPass(L"sphereVS.cso", L"spherePS.cso");
-	addModelToPass(passSphere, sphere);
+	const auto passTeapot = addPass(L"teapotVS.cso", L"teapotPS.cso");
+
+	//addModelToPass(passSphere, sphere);
+	addModelToPass(passTeapot, teapot);
 }

@@ -7,8 +7,8 @@ namespace mini
 	{
 		class ShaderDemo : public GK2ShaderDemoBase
 		{
-		public:
-			explicit ShaderDemo(HINSTANCE hInst);
+			public:
+				explicit ShaderDemo(HINSTANCE hInst);
 		};
 	}
 }
