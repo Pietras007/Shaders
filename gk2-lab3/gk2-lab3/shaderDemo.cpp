@@ -32,6 +32,11 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 	m_variables.AddGuiVariable("r", 0.5f, 0.01f, 1);
 	m_variables.AddGuiVariable("rsmall", 0.1f, 0.01f, 0.5f);
 
+	m_variables.AddGuiVariable("thalf", 3.f, 1.f, 5.f);
+	m_variables.AddGuiVariable("xmax", .5f, .1f, 1.f);
+	m_variables.AddGuiVariable("vmax", 4.f, .5f, 10.f);
+	m_variables.AddSemanticVariable("time", VariableSemantic::FloatT);
+
 	//Models
 	//const auto sphere = addModelFromString("s 0 0 0 0.5");
 	auto teapot = addModelFromFile("models/Teapot.3ds");

@@ -1,7 +1,9 @@
+float time, xmax, vmax, thalf;
 matrix modelMtx, modelInvTMtx, viewProjMtx;
 float4 camPos;
 float h0, l, r, rsmall;
 static const float two_pi = 6.283185307179586476925286766559f;
+static const int halfTimes = 4;
 
 struct VSInput
 {
@@ -24,10 +26,12 @@ float dangle_ds(float l, float r, float h);
 float3 get_position(float s, float r, float h, float a);
 float3 get_tangent(float s, float r, float h, float a);
 float3 get_normal(float s, float r, float h, float a);
+float springHeight(float time);
 
 VSOutput main(VSInput i)
 {
-	float h = h0;//przydasiepozniej
+	int x;
+	float h = h0 + springHeight(modf(time / (halfTimes * thalf), x) * halfTimes * thalf);
 	float a = dangle_ds(l, r, h);
 	float3 CurvePosition = get_position(i.pos.y, r, h, a);
 	float3 CurveTangent = normalize(get_tangent(i.pos.y, r, h, a));
@@ -68,4 +72,9 @@ float3 get_tangent(float s, float r, float h, float a)
 float3 get_normal(float s, float r, float h, float a)
 {
 	return float3(-r * (a * s * cos(a * s) + sin(a * s)), 0.0f, r * (cos(a * s) - a * s * sin(a * s)));
+}
+
+float springHeight(float time)
+{
+	return xmax * exp(-0.693147f * time / thalf) * sin(vmax * time / xmax);
 }
