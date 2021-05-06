@@ -1,5 +1,6 @@
 matrix modelMtx, modelInvTMtx, viewProjMtx;
 float4 camPos;
+float h0;
 
 struct VSInput
 {
@@ -20,9 +21,10 @@ struct VSOutput
 VSOutput main(VSInput i)
 {
 	VSOutput o;
+	float4 worldPos = mul(modelMtx, float4(i.pos, 1.0f)); 
+	worldPos.y += h0;
 	o.tex = i.tex / 4.0f;
 
-	float4 worldPos = mul(modelMtx, float4(i.pos, 1.0f));
 	o.view = normalize(camPos.xyz - worldPos.xyz);
 	o.norm = normalize(mul(modelInvTMtx, float4(i.norm, 0.0f)).xyz);
 	o.worldPos = worldPos.xyz;
