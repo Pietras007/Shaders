@@ -24,10 +24,10 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 	m_variables.AddGuiVariable("ka", 0.2f);
 	m_variables.AddGuiVariable("m", 50.f, 10.f, 200.f);
 	m_variables.AddSampler(m_device, "samp");
-	m_variables.AddTexture(m_device, "normTex", L"textures/normal.png");
+	m_variables.AddTexture(m_device, "normTex", L"textures/normal.jpg");
 
 	//Models
-	const auto sphere = addModelFromString("s 0 0 0 0.5");
+	//const auto sphere = addModelFromString("s 0 0 0 0.5");
 	auto teapot = addModelFromFile("models/Teapot.3ds");
 
 	//Transform teapot
@@ -39,7 +39,7 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 	model(teapot).applyTransform(modelMtx);
 
 	//Render Passes
-	const auto passSphere = addPass(L"sphereVS.cso", L"spherePS.cso");
+	//const auto passSphere = addPass(L"sphereVS.cso", L"spherePS.cso");
 	const auto passTeapot = addPass(L"teapotVS.cso", L"teapotPS.cso");
 
 	//addModelToPass(passSphere, sphere);
