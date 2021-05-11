@@ -11,8 +11,9 @@ struct VSOutput
 VSOutput main(float3 pos:POSITION0)
 {
 	VSOutput o;
-	o.worldPos = mul(modelMtx, float4(pos.x, waterLevel, pos.z, 1.0f));
+	float4 _pos = mul(modelMtx, float4(pos.x, waterLevel, pos.z, 1.0f));
+	o.worldPos = _pos;
 	o.localPos = float3(pos.x, waterLevel, pos.z);
-	o.pos = mul(viewProjMtx, o.worldPos);
+	o.pos = mul(viewProjMtx, _pos);
 	return o;
 }

@@ -1,6 +1,8 @@
 float4 camPos;
 sampler samp;
 textureCUBE envMap;
+texture3D perlin;
+float time;
 
 struct PSInput
 {
@@ -23,10 +25,11 @@ float3 intersectRay(float3 p, float3 d)
 float fresnel(float n1, float n2, float3 N, float3 V)
 {
 	float F0 = pow((n2 - n1) / (n2 + n1), 2);
-	/*if (dot(N, V) < 0)
+	if (dot(N, V) < 0)
 	{
-		N = -N
-	};*/
+		N = -N;
+	}
+
 	float cos = max(dot(N, V), 0);
 	return F0 + (1.0f - F0) * pow((1.0f - cos), 5);
 }
@@ -34,9 +37,19 @@ float fresnel(float n1, float n2, float3 N, float3 V)
 float4 main(PSInput i) :SV_TARGET
 {
 	float3 viewVec = normalize(camPos.xyz - i.worldPos);
-	float3 norm = float3(0.0f, 1.0f, 0.0f);
-	float3 reflection = reflect(viewVec, norm);
-	float3 refraction = refract(viewVec, norm, 0.17f);
+	//float3 norm = float3(0.0f, 1.0f, 0.0f);
+
+	float3 tex = float3(i.localPos.xz * 10.0f, time);
+	float ex = perlin.Sample(samp, tex);
+	tex.x += float3(0.5f, 0.5f, 0.5f);
+
+	float ez = perlin.Sample(samp, tex);
+	float3 N = normalize(float3(ex, 20.0f, ez));
+
+	float3 reflection = reflect(-viewVec, N);
+	float3 refraction = refract(-viewVec, N, 0.17f);
+
+
 	/*float3 color = envMap.Sample(samp, i.tex).rgb;
 	color = pow(color, 0.4545f);
 	return float4(color, 1.0f);*/
