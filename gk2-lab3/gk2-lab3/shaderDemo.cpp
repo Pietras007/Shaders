@@ -37,10 +37,18 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 	m_variables.AddGuiVariable("vmax", 4.f, .5f, 10.f);
 	m_variables.AddSemanticVariable("time", VariableSemantic::FloatT);
 
+	m_variables.AddTexture(m_device, "envMap", L"textures/cubeMap.dds");
+	m_variables.AddTexture(m_device, "perlin", L"textures/NoiseVolume.dds");
+	m_variables.AddSemanticVariable("mvpMtx", VariableSemantic::MatMVP);
+	m_variables.AddGuiVariable("waterLevel", -0.05f, -1, 1, 0.001f);
+
 	//Models
 	//const auto sphere = addModelFromString("s 0 0 0 0.5");
 	auto teapot = addModelFromFile("models/Teapot.3ds");
 	auto plane = addModelFromFile("models/Plane.obj");
+	auto quad = addModelFromString("pp 4\n1 0 1 0 1 0\n1 0 -1 0 1 0\n"
+									"-1 0 -1 0 1 0\n-1 0 1 0 1 0\n");
+	auto envModel = addModelFromString("hex 0 0 0 1.73205");
 
 	//Transform teapot
 	XMFLOAT4X4 modelMtx;
@@ -53,10 +61,25 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 	XMStoreFloat4x4(&modelMtx, XMMatrixTranslation(0, -h0, 0));
 	model(plane).applyTransform(modelMtx);
 
+
+	XMStoreFloat4x4(&modelMtx, XMMatrixScaling(20, 20, 20));
+	model(quad).applyTransform(modelMtx);
+	model(envModel).applyTransform(modelMtx);
+
 	//Render Passes
 	//const auto passSphere = addPass(L"sphereVS.cso", L"spherePS.cso");
 	const auto passTeapot = addPass(L"teapotVS.cso", L"teapotPS.cso");
 	auto passSpring = addPass(L"springVS.cso", L"springPS.cso");
+	auto passEnv = addPass(L"envVS.cso", L"envPS.cso");
+	auto passWater = addPass(L"waterVS.cso", L"waterPS.cso");
+	
+	
+	addModelToPass(passWater, quad);
+	RasterizerDescription rs;
+	rs.CullMode = D3D11_CULL_NONE; addRasterizerState(passWater, rs);
+
+	addModelToPass(passEnv, envModel);
+	addRasterizerState(passEnv, RasterizerDescription(true));
 	
 	addModelToPass(passSpring, plane);
 	//addModelToPass(passSphere, sphere);
