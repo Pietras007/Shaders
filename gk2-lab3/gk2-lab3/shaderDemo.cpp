@@ -14,14 +14,14 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 	m_variables.AddSemanticVariable("viewProjMtx", VariableSemantic::MatVP);
 	m_variables.AddSemanticVariable("camPos", VariableSemantic::Vec4CamPos);
 
-	XMFLOAT4 lightPos[2] = { { -1,0,-1.7f,1 },{ 0,1.7f,0,1 } };
-	XMFLOAT3 lightColor[2] = { { 1, 0.8f, 0.9f },{ 0.1f, 0, 1 } };
-	m_variables.AddGuiVariable("lightPos", lightPos, -10, 10);
-	m_variables.AddGuiColorsVariable("lightColor", lightColor);
-	m_variables.AddGuiColorVariable("surfaceColor", XMFLOAT3{ 0.5f, 1.0f, 0.8f });
+	//XMFLOAT4 lightPos[2] = { { -1,0,-1.7f,1 },{ 0,1.7f,0,1 } };
+	//XMFLOAT3 lightColor[2] = { { 1, 0.8f, 0.9f },{ 0.1f, 0, 1 } };
+	//m_variables.AddGuiVariable("lightPos", lightPos, -10, 10);
+	//m_variables.AddGuiColorsVariable("lightColor", lightColor);
+	/*m_variables.AddGuiColorVariable("surfaceColor", XMFLOAT3{ 0.5f, 1.0f, 0.8f });
 	m_variables.AddGuiVariable("ks", 0.8f);
 	m_variables.AddGuiVariable("kd", 0.5f);
-	m_variables.AddGuiVariable("ka", 0.2f);
+	m_variables.AddGuiVariable("ka", 0.2f);*/
 	m_variables.AddGuiVariable("m", 50.f, 10.f, 200.f);
 	m_variables.AddSampler(m_device, "samp");
 	m_variables.AddTexture(m_device, "normTex", L"textures/normal.jpg");
@@ -41,6 +41,18 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 	m_variables.AddTexture(m_device, "perlin", L"textures/NoiseVolume.dds");
 	m_variables.AddSemanticVariable("mvpMtx", VariableSemantic::MatMVP);
 	m_variables.AddGuiVariable("waterLevel", -0.05f, -1, 1, 0.001f);
+
+
+
+	XMFLOAT4 lightPos[2] = { { -1.f, 0.0f, -3.5f, 1.f },{  0.f, 3.5f,  0.0f, 1.f } };
+	XMFLOAT3 lightColor[2] = { { 12.f, 9.f, 10.f },{  1.f, 0.f, 30.f } };
+	m_variables.AddGuiVariable("lightPos", lightPos, -10, 10);
+	m_variables.AddGuiVariable("lightColor", lightColor, 0, 100, 1);
+	m_variables.AddGuiColorVariable("albedo", XMFLOAT3{ 1.f, 1.f, 1.f });
+	m_variables.AddGuiVariable("metallness", 1.0f);
+	m_variables.AddGuiVariable("roughness", .3f, .1f);
+
+
 
 	//Models
 	//const auto sphere = addModelFromString("s 0 0 0 0.5");

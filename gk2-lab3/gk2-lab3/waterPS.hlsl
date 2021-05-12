@@ -47,15 +47,29 @@ float4 main(PSInput i) :SV_TARGET
 	float3 N = normalize(float3(ex, 20.0f, ez));
 
 	float3 reflection = reflect(-viewVec, N);
-	float3 refraction = refract(-viewVec, N, 0.17f);
-
-
-	/*float3 color = envMap.Sample(samp, i.tex).rgb;
-	color = pow(color, 0.4545f);
-	return float4(color, 1.0f);*/
+	float n1 = 1.0f;
+	float n2 = 4.0f / 3.0f;
+	float x = n1 / n2;
+	if (dot(N, viewVec) < 0) x = n2 / n1;
+	float3 refraction = refract(-viewVec, N, x);
+	float fres = fresnel(n1, n2, N, viewVec);
 
 	float3 reflect = intersectRay(i.localPos, reflection);
-	float3 color = envMap.Sample(samp, reflect).rgb;
+	float3 colorReflect = envMap.Sample(samp, reflect).rgb;
+
+	float3 refract = intersectRay(i.localPos, refraction);
+	float3 colorRefract = envMap.Sample(samp, refract).rgb;
+	float3 color = fres * colorReflect + (1.0f - fres) * colorRefract;
+	if (dot(N, viewVec) < 0)
+	{
+		refract.y = -refract.y;
+		color = envMap.Sample(samp, refract).rgb;
+		if (!any(refraction))
+		{
+			color = colorReflect;
+		}
+	}
+
 	color = pow(color, 0.4545f);
 	return float4(color, 1.0f);
 
