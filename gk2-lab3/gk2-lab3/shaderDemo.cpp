@@ -43,6 +43,10 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 	m_variables.AddGuiVariable("waterLevel", -0.05f, -1, 1, 0.001f);
 
 
+	m_variables.AddTexture(m_device, "albedoTex", L"textures/rustediron2/albedo.png");
+	m_variables.AddTexture(m_device, "roughnessTex", L"textures/rustediron2/roughness.png");
+	m_variables.AddTexture(m_device, "metallicTex", L"textures/rustediron2/metallic.png");
+
 
 	XMFLOAT4 lightPos[2] = { { -1.f, 0.0f, -3.5f, 1.f },{  0.f, 3.5f,  0.0f, 1.f } };
 	XMFLOAT3 lightColor[2] = { { 12.f, 9.f, 10.f },{  1.f, 0.f, 30.f } };

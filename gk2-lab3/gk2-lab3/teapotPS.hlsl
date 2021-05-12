@@ -1,13 +1,16 @@
 #define NLIGHTS 2
 SamplerState samp : register(s0);
 Texture2D normTex : register(t0);
+Texture2D albedoTex : register(t1);
+Texture2D roughnessTex : register(t2);
+Texture2D metallicTex : register(t3);
 
 float4 lightPos[NLIGHTS];
 float3 lightColor[NLIGHTS];
 float3 surfaceColor;
-float3 albedo;
-float metallness;
-float roughness;
+//float3 albedo;
+//float metallness;
+//float roughness;
 
 float3 normalMapping(float3 N, float3 T, float3 tn);
 float normalDistributionGGX(float3 N, float3 H, float r);
@@ -27,6 +30,10 @@ struct PSInput
 
 float4 main(PSInput i) : SV_TARGET
 {
+	float3 albedo = albedoTex.Sample(samp, i.tex);
+	float metallness = metallicTex.Sample(samp, i.tex);
+	float roughness = roughnessTex.Sample(samp, i.tex);
+
 	float3 color = float3(0,0,0);
 	float3 abd = pow(albedo, 2.2f);
 	float3 f0 = float3(0.04f, 0.04f, 0.04f) * (1.0f - metallness) + abd * metallness;
