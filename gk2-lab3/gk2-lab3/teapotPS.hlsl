@@ -5,6 +5,10 @@ Texture2D albedoTex : register(t1);
 Texture2D roughnessTex : register(t2);
 Texture2D metallicTex : register(t3);
 
+TextureCube irMap;
+TextureCube pfEnvMap;
+Texture2D brdfTex;
+
 float4 lightPos[NLIGHTS];
 float3 lightColor[NLIGHTS];
 float3 surfaceColor;
@@ -38,6 +42,17 @@ float4 main(PSInput i) : SV_TARGET
 	float3 abd = pow(albedo, 2.2f);
 	float3 f0 = float3(0.04f, 0.04f, 0.04f) * (1.0f - metallness) + abd * metallness;
 	float3 view = normalize(i.view);
+	float3 N = normalize(i.norm);
+
+	float3 Iir = irMap.Sample(samp, N).rgb;
+	float3 kdv = (float3(1.0f, 1.0f, 1.0f) - fresnel(f0, N, view)) * (1.0f - metallness);
+	float3 R = reflect(-view, N);
+	float3 Ii = pfEnvMap.SampleLevel(samp, R, roughness * 6.0f).rgb;
+
+	float2 brdf = brdfTex.Sample(samp, float2(max(dot(N, view), 0.0f), roughness)).rg;
+	float3 Is = Ii * (f0 * brdf.x + brdf.y);
+	float3 Id = kdv * abd * Iir + Is;
+
 
 	for (int lightno = 0; lightno < NLIGHTS; lightno++)
 	{
@@ -52,7 +67,7 @@ float4 main(PSInput i) : SV_TARGET
 		color = color + brdf * Li;
 	}
 
-	float3 ambient = 0.03f * abd;
+	float3 ambient = 0.03f * abd + Id;
 	color = pow(color + ambient, 0.4545f);
 	return float4(color, 1.0f);
 }

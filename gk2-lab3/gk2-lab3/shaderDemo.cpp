@@ -48,6 +48,14 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 	m_variables.AddTexture(m_device, "metallicTex", L"textures/rustediron2/metallic.png");
 
 
+	m_variables.AddTexture(m_device, "irMap",
+		L"textures/cubeMapIrradiance.dds");
+	m_variables.AddTexture(m_device, "pfEnvMap",
+		L"textures/cubeMapRadiance.dds");
+	m_variables.AddTexture(m_device, "brdfTex",
+		L"textures/brdf_lut.png");
+
+
 	XMFLOAT4 lightPos[2] = { { -1.f, 0.0f, -3.5f, 1.f },{  0.f, 3.5f,  0.0f, 1.f } };
 	XMFLOAT3 lightColor[2] = { { 12.f, 9.f, 10.f },{  1.f, 0.f, 30.f } };
 	m_variables.AddGuiVariable("lightPos", lightPos, -10, 10);
