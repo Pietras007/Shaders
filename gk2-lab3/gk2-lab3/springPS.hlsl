@@ -1,14 +1,23 @@
 #define NLIGHTS 2
 SamplerState samp : register(s0);
 Texture2D normTex : register(t0);
+Texture2D albedoTex : register(t1);
+Texture2D roughnessTex : register(t2);
+Texture2D metallicTex : register(t3);
 
 float4 lightPos[NLIGHTS];
 float3 lightColor[NLIGHTS];
 float3 surfaceColor;
-float ks, kd, ka, m;
+//float3 albedo;
+//float metallness;
+//float roughness;
 
 float3 normalMapping(float3 N, float3 T, float3 tn);
-float4 phong(float3 worldPos, float3 norm, float3 view);
+float normalDistributionGGX(float3 N, float3 H, float r);
+float geometrySchlickGGX(float3 N, float3 W, float r);
+float geometrySmith(float3 N, float3 V, float3 L, float r);
+float3 fresnel(float3 f0, float3 N, float3 L);
+float FCT(float3 f0, float3 norm, float3 view, float3 li, float3 h, float roughness);
 
 struct PSInput
 {
@@ -22,19 +31,31 @@ struct PSInput
 
 float4 main(PSInput i) : SV_TARGET
 {
-	float3 tn = normTex.Sample(samp, i.tex);
-	tn = (tn + 1.0f) / 2.0f;
+	float3 albedo = albedoTex.Sample(samp, i.tex);
+	float metallness = metallicTex.Sample(samp, i.tex);
+	float roughness = roughnessTex.Sample(samp, i.tex);
 
-	float3 N = normalize(i.norm);
-	float3 dPdx = ddx(i.worldPos);
-	float3 dPdy = ddy(i.worldPos);
-	float2 dtdx = ddx(i.tex);
-	float2 dtdy = ddy(i.tex);
-	float3 T = normalize(i.tangent);
+	float3 color = float3(0,0,0);
+	float3 abd = pow(albedo, 2.2f);
+	float3 f0 = float3(0.04f, 0.04f, 0.04f) * (1.0f - metallness) + abd * metallness;
+	float3 view = normalize(i.view);
 
-	float3 norm = normalMapping(N, T, tn);
+	for (int lightno = 0; lightno < NLIGHTS; lightno++)
+	{
+		float3 li = (lightPos[lightno].rgb - i.worldPos) / length(lightPos[lightno].rgb - i.worldPos);
+		float3 Li = lightColor[lightno] * (max(dot(i.norm, li), 0)) / pow(length(lightPos[lightno].rgb - i.worldPos), 2);
+		float3 h = (view + li) / length(view + li);
 
-	return phong(i.worldPos, norm, i.view);
+		float3 kd = (float3(1,1,1) - fresnel(f0, i.norm, li)) * (1.0f - metallness);
+		float fl = abd / 3.141592f;
+		float3 brdf = kd * fl + FCT(f0, i.norm, view, li, h, roughness);
+
+		color = color + brdf * Li;
+	}
+
+	float3 ambient = 0.03f * abd;
+	color = pow(color + ambient, 0.4545f);
+	return float4(color, 1.0f);
 }
 
 float3 normalMapping(float3 N, float3 T, float3 tn)
@@ -47,18 +68,32 @@ float3 normalMapping(float3 N, float3 T, float3 tn)
 	return result;
 }
 
-float4 phong(float3 worldPos, float3 norm, float3 view)
+float normalDistributionGGX(float3 N, float3 H, float r)
 {
-	view = normalize(view);
-	norm = normalize(norm);
-	float3 color = surfaceColor * ka; //ambient
-	for (int k = 0; k < NLIGHTS; ++k)
-	{
-		float3 lightVec = normalize(lightPos[k].xyz - worldPos);
-		float3 halfVec = normalize(view + lightVec);
-		color += lightColor[k] * kd * surfaceColor * saturate(dot(norm, lightVec));//diffuse
-		color += lightColor[k] * ks * pow(saturate(dot(norm, halfVec)), m);//specular
-	}
+	float _max = max(dot(N, H), 0);
+	float _r2 = (r * r - 1);
+	return (r * r) / (3.141592 * pow(pow(_max, 2) * _r2 + 1, 2));
+}
 
-	return saturate(float4(color, 1.0f));
+float geometrySchlickGGX(float3 N, float3 W, float r)
+{
+	float q = (r + 1.0f) * (r + 1.0f) / 8.0f;
+	float mx = max(dot(N, W), 0);
+	return mx / (mx * (1 - q) + q);
+}
+
+float geometrySmith(float3 N, float3 V, float3 L, float r)
+{
+	return geometrySchlickGGX(N, V, r) * geometrySchlickGGX(N, L, r);
+}
+
+float3 fresnel(float3 f0, float3 N, float3 L)
+{
+	return f0 + (1.0f - f0) * pow(1.0f - max(dot(N, L), 0), 5);
+}
+
+float FCT(float3 f0, float3 norm, float3 view, float3 li, float3 h, float roughness)
+{
+	if (max(dot(norm, view), 0) * max(dot(norm, li), 0) == 0) return 0;
+	return fresnel(f0, h, li) * normalDistributionGGX(norm, h, roughness) * geometrySmith(norm, view, li, roughness) / (4 * max(dot(norm, view), 0) * max(dot(norm, li), 0));
 }
