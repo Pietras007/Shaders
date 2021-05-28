@@ -130,11 +130,8 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 	//addModelToPass(passSphere, sphere);
 	addModelToPass(passTeapot, teapot);
 
-	auto passDownsample = addPass(L"fullScreenQuadVS.cso", L"downsamplePS.cso", "halfscreen1");
+	auto passDownsample = addPass(L"fullScreenQuadVS.cso", L"hblurPS.cso", "halfscreen2");
 	addModelToPass(passDownsample, quad);
-
-	auto passHBlur = addPass(L"fullScreenQuadVS.cso", L"hblurPS.cso", "halfscreen2");
-	addModelToPass(passHBlur, quad);
 
 	auto passVBlur = addPass(L"fullScreenQuadVS.cso", L"vblurPS.cso", getDefaultRenderTarget());
 	addModelToPass(passVBlur, quad);

@@ -32,7 +32,5 @@ float4 main(VSOutput i) : SV_TARGET
 	for (int k = 0; k < 13; ++k)
 		color += blurWeights[k] * halfscreen1.Sample(blurSampler, i.tex + float2(((k - 6) * 2 - 0.5f) * texelSize.x,	0.0f));
 
-
-
-	return float4(halfscreen1.Sample(blurSampler, i.tex).rgb, 1.0f);
+	return color;
 }
