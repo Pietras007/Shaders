@@ -83,6 +83,9 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 	m_variables.AddSemanticVariable("viewportDim", VariableSemantic::Vec2ViewportDims);
 	m_variables.AddGuiVariable("blurScale", 1.0f, 0.1f, 2.0f);
 
+	m_variables.AddGuiVariable("cutoff", 0.72f, 0.1f, 1.0f);
+
+
 	SamplerDescription sDesc;
 	sDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	sDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -111,7 +114,7 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 	//Render Passes
 	//const auto passSphere = addPass(L"sphereVS.cso", L"spherePS.cso");
 	//const auto passTeapot = addPass(L"teapotVS.cso", L"teapotPS.cso");
-	auto passTeapot = addPass(L"teapotVS.cso", L"teapotPS.cso", "halfscreen1");
+	auto passTeapot = addPass(L"teapotVS.cso", L"teapotPS.cso", "screen");
 
 	auto passSpring = addPass(L"springVS.cso", L"springPS.cso");
 	auto passEnv = addPass(L"envVS.cso", L"envPS.cso");
@@ -130,12 +133,17 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 	//addModelToPass(passSphere, sphere);
 	addModelToPass(passTeapot, teapot);
 
-	auto passDownsample = addPass(L"fullScreenQuadVS.cso", L"hblurPS.cso", "halfscreen2");
+	auto passDownsample = addPass(L"fullScreenQuadVS.cso", L"downsamplePS.cso",	"halfscreen1");
 	addModelToPass(passDownsample, quad);
 
-	auto passVBlur = addPass(L"fullScreenQuadVS.cso", L"vblurPS.cso", getDefaultRenderTarget());
+	auto passHBlur = addPass(L"fullScreenQuadVS.cso", L"hblurPS.cso", "halfscreen2");
+	addModelToPass(passHBlur, quad);
+
+	auto passVBlur = addPass(L"fullScreenQuadVS.cso", L"vblurPS.cso", "halfscreen1", true);
 	addModelToPass(passVBlur, quad);
 
+	auto passComposite = addPass(L"fullScreenQuadVS.cso", L"compositePS.cso", getDefaultRenderTarget());
+	addModelToPass(passComposite, quad);
 }
 
 
