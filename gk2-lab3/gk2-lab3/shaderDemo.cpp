@@ -111,7 +111,7 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 	//Render Passes
 	//const auto passSphere = addPass(L"sphereVS.cso", L"spherePS.cso");
 	//const auto passTeapot = addPass(L"teapotVS.cso", L"teapotPS.cso");
-	auto passTeapot = addPass(L"teapotVS.cso", L"teapotPS.cso", "screen");
+	auto passTeapot = addPass(L"teapotVS.cso", L"teapotPS.cso", "halfscreen1");
 
 	auto passSpring = addPass(L"springVS.cso", L"springPS.cso");
 	auto passEnv = addPass(L"envVS.cso", L"envPS.cso");
@@ -120,7 +120,8 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 	
 	addModelToPass(passWater, quad);
 	RasterizerDescription rs;
-	rs.CullMode = D3D11_CULL_NONE; addRasterizerState(passWater, rs);
+	rs.CullMode = D3D11_CULL_NONE; 
+	addRasterizerState(passWater, rs);
 
 	addModelToPass(passEnv, envModel);
 	addRasterizerState(passEnv, RasterizerDescription(true));
@@ -129,6 +130,15 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 	//addModelToPass(passSphere, sphere);
 	addModelToPass(passTeapot, teapot);
 
-	auto passDownsample = addPass(L"fullScreenQuadVS.cso", L"downsamplePS.cso",	getDefaultRenderTarget());
+	auto passDownsample = addPass(L"fullScreenQuadVS.cso", L"downsamplePS.cso", "halfscreen1");
 	addModelToPass(passDownsample, quad);
+
+	auto passHBlur = addPass(L"fullScreenQuadVS.cso", L"hblurPS.cso", "halfscreen2");
+	addModelToPass(passHBlur, quad);
+
+	auto passVBlur = addPass(L"fullScreenQuadVS.cso", L"vblurPS.cso", getDefaultRenderTarget());
+	addModelToPass(passVBlur, quad);
+
 }
+
+
