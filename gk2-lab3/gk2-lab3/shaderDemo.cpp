@@ -56,6 +56,9 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 		L"textures/brdf_lut.png");
 
 
+	
+
+
 	XMFLOAT4 lightPos[2] = { { -1.f, 0.0f, -3.5f, 1.f },{  0.f, 3.5f,  0.0f, 1.f } };
 	XMFLOAT3 lightColor[2] = { { 12.f, 9.f, 10.f },{  1.f, 0.f, 30.f } };
 	m_variables.AddGuiVariable("lightPos", lightPos, -10, 10);
@@ -79,8 +82,14 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 	m_variables.AddRenderableTexture(m_device, "screen", screenSize);
 	m_variables.AddRenderableTexture(m_device, "halfscreen1", SIZE{ screenSize.cx / 2,screenSize.cy / 2 });
 	m_variables.AddRenderableTexture(m_device, "halfscreen2", SIZE{ screenSize.cx / 2,screenSize.cy / 2 });
+	m_variables.AddTexture(m_device, "screenColor", Texture2DDescription(screenSize.cx, screenSize.cy, DXGI_FORMAT_R8G8B8A8_UNORM, 1));
+	m_variables.AddTexture(m_device, "screenDepth", Texture2DDescription(screenSize.cx, screenSize.cy, DXGI_FORMAT_R24_UNORM_X8_TYPELESS, 1));
 
 	m_variables.AddSemanticVariable("viewportDim", VariableSemantic::Vec2ViewportDims);
+	m_variables.AddSemanticVariable("nearZ", VariableSemantic::FloatNearPlane);
+	m_variables.AddSemanticVariable("projInvMtx", VariableSemantic::MatPInv);
+	m_variables.AddGuiVariable("depthThickness", 0.05f, 0.0f, 0.5f);
+
 	m_variables.AddGuiVariable("blurScale", 1.0f, 0.1f, 2.0f);
 
 	m_variables.AddGuiVariable("cutoff", 0.72f, 0.1f, 1.0f);
@@ -144,6 +153,10 @@ ShaderDemo::ShaderDemo(HINSTANCE hInst): GK2ShaderDemoBase(hInst)
 
 	auto passComposite = addPass(L"fullScreenQuadVS.cso", L"compositePS.cso", getDefaultRenderTarget());
 	addModelToPass(passComposite, quad);
+
+	copyRenderTarget(passWater, "screenColor");
+	copyDepthBuffer(passWater, "screenDepth");
+
 }
 
 
